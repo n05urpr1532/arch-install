@@ -9,7 +9,12 @@ ROOT_PASSWORD=root
 USERNAME=jpv
 USER_PASSWORD=jpv
 INSTALL_GUI=1
+SET_VFIO=1
 IS_VM_GUEST=1
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+
+pushd "${script_dir}"
 
 # Functions
 source ../common/functions.sh
@@ -25,8 +30,10 @@ source ./functions/paru.sh
 source ./functions/btrfsmaintenance.sh
 source ./functions/snapper.sh
 source ./functions/gui/openbox.sh
+source ./functions/vm-guest/vm-guest.sh
+source ./functions/vfio/vfio.sh
 
-root_device_parameter=$1
+root_device_parameter=${1:-}
 
 check_root_device_parameter "${root_device_parameter}"
 
@@ -52,7 +59,7 @@ configure_swap
 # Boostrapping
 #
 pacstrap /mnt base base-devel linux linux-firmware intel-ucode \
-  grub os-prober dosfstools efibootmgr mtools ntfs-3g hdparm nvme-cli sdparm smartmontools usbutils usb_modeswitch lm_sensors i2c-tools powertop liquidctl \
+  grub os-prober dosfstools efibootmgr mtools ntfs-3g hdparm nvme-cli sdparm smartmontools usbutils usb_modeswitch lm_sensors i2c-tools lshw powertop liquidctl \
   btrfs-progs grub-btrfs compsize \
   lsb-release acpid linux-tools dmidecode logrotate pacman-contrib \
   man-db man-pages texinfo \
@@ -78,9 +85,9 @@ fi
 configure_reflector
 
 #
-# Enable services
+# Enable various services
 #
-arch-chroot /mnt systemctl enable acpid.service lm_sensors.service sensord.service smartd.service logrotate.timer reflector.timer
+arch-chroot /mnt systemctl enable acpid.service smartd.service logrotate.timer
 
 #
 # Enable weekly TRIM
@@ -198,6 +205,8 @@ configure_snapper "${root_device_parameter}"
 #
 if [ "${INSTALL_GUI}" == "1" ]; then
 
+  init_container
+
   install_openbox "${USERNAME}"
 
   configure_openbox "${USERNAME}"
@@ -221,6 +230,13 @@ fi
 configure_snap_pac_and_rollback "${USERNAME}"
 
 #
+# VFIO setup
+#
+if [ "${SET_VFIO}" == "1" ]; then
+  configure_vfio
+fi
+
+#
 # Cleanup pacman and paru
 #
 clean_pacman
@@ -234,7 +250,11 @@ clean_snapper
 #
 # List enabled systemd units
 #
-arch-chroot /mnt systemctl list-unit-files --state enabled
+if [ "${INSTALL_GUI}" == "1" ]; then
+  exec_in_container /usr/bin/systemctl list-unit-files --state enabled
+else
+  arch-chroot /mnt systemctl list-unit-files --state enabled
+fi
 
 #
 # Setting wheel as sudoer with password
@@ -245,4 +265,10 @@ sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /mnt/etc/sudoers
 #
 # Cleanup
 #
+if [ "${INSTALL_GUI}" == "1" ]; then
+  stop_container
+fi
+sleep 5
 unmount_root "${root_device_parameter}"
+
+popd

@@ -3,8 +3,10 @@
 check_root_device_parameter () {
   local root_device_parameter=$1
   if [ -z "${root_device_parameter}" ]; then
-    echo "Error !"
-    echo "Specify a root device as a paramater (i.e. /dev/sda)"
+    echo "!!! Error !!!"
+    echo ""
+    echo "Please specify a root device as a parameter (for example: /dev/sda)"
+    echo ""
     exit 1
   fi
 }
@@ -37,4 +39,17 @@ unmount_root () {
   swapoff /mnt/var/swap/swapfile || true
   umount -A "${root_device_parameter}1" || true
   umount -A "${root_device_parameter}2" || true
+}
+
+init_container () {
+  systemd-nspawn -bD /mnt &
+}
+
+exec_in_container () {
+  machinectl shell mnt "$@"
+}
+
+stop_container () {
+  machinectl shell mnt /usr/bin/poweroff
+  machinectl kill mnt || true
 }
