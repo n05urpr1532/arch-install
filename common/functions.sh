@@ -42,7 +42,8 @@ unmount_root () {
 }
 
 init_container () {
-  systemd-nspawn -bD /mnt &
+  sleep 5
+  (systemd-nspawn -bD /mnt) &
 }
 
 exec_in_container () {
@@ -51,5 +52,6 @@ exec_in_container () {
 
 stop_container () {
   machinectl shell mnt /usr/bin/poweroff
+  sleep 5
   machinectl kill mnt || true
 }
