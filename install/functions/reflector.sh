@@ -37,4 +37,6 @@ configure_reflector () {
 EOF
 
   arch-chroot /mnt systemctl start reflector.service
+
+  arch-chroot /mnt systemctl enable reflector.timer
 }
