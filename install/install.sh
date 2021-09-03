@@ -64,7 +64,7 @@ pacstrap /mnt base base-devel linux linux-firmware intel-ucode \
   lsb-release acpid linux-tools dmidecode logrotate pacman-contrib \
   man-db man-pages texinfo \
   arj unarj bzip2 gzip lhasa p7zip tar unrar zip unzip xz zstd \
-  vim nano bash-completion fish pkgfile mlocate htop lsof strace tmux neofetch jq \
+  vim nano bat bash-completion fish pkgfile mlocate htop lsof strace tmux neofetch jq \
   aria2 reflector networkmanager git git-lfs rsync wget openssh net-tools ethtool gnu-netcat ntp
 
 #
