@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2086
 
 #
 # btrfsmaintenance config
@@ -7,7 +6,7 @@
 configure_btrfsmaintenance() {
   local user_name=$1
 
-  arch-chroot /mnt su -c 'paru -S --noconfirm --needed btrfsmaintenance' - ${user_name}
+  arch-chroot /mnt su -c 'paru -S --noconfirm --needed btrfsmaintenance' - "${user_name}"
 
   sed -i 's@^BTRFS_LOG_OUTPUT="stdout"@BTRFS_LOG_OUTPUT="journal"@' /mnt/etc/default/btrfsmaintenance
   sed -i 's@^BTRFS_BALANCE_MOUNTPOINTS="/"@BTRFS_BALANCE_MOUNTPOINTS="/.btrfs-root"@' /mnt/etc/default/btrfsmaintenance

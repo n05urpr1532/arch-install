@@ -10,7 +10,7 @@ USERNAME=jpv
 USER_PASSWORD=jpv
 INSTALL_GUI=1
 SET_VFIO=1
-IS_VM_GUEST=1
+IS_VM_GUEST=0
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 
