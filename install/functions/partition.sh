@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2086
 
 #
 # Partitioning
@@ -10,16 +9,15 @@ create_partitions () {
   # Create 2 partitions:
   # * ESP - 256M, type "EFI System"
   # * BROOT - The rest, type "Linux filesystem" (by default)
-  parted --align optimal -s ${root_device_parameter} "mklabel gpt mkpart ESP fat32 1MiB 257MiB mkpart BROOT btrfs 257MiB 50% set 1 esp on"
+  parted --align optimal -s "${root_device_parameter}" "mklabel gpt mkpart ESP fat32 1MiB 257MiB mkpart BROOT btrfs 257MiB 50% set 1 esp on"
 
-  mkfs.fat -v -F 32 -n ESP ${root_device_parameter}1
-  mkfs.btrfs -L BROOT ${root_device_parameter}2 -f
+  mkfs.fat -v -F 32 -n ESP "${root_device_parameter}1"
+  mkfs.btrfs -L BROOT "${root_device_parameter}2" -f
 
   #
   # BTRFS layout config
   #
-
-  mount ${root_device_parameter}2 /mnt
+  mount "${root_device_parameter}2" /mnt
 
   btrfs sub create /mnt/@
   btrfs sub create /mnt/@home
