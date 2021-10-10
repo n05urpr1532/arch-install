@@ -3,21 +3,13 @@
 # Safe Bash parameters
 set -euo pipefail
 
-# Global configuration
-HOSTNAME=archlinux
-ROOT_PASSWORD=root
-USERNAME=jpv
-USER_PASSWORD=jpv
-INSTALL_GUI=1
-SET_VFIO=1
-IS_VM_GUEST=0
-
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 
 pushd "${script_dir}"
 
 # Functions
 source ../common/functions.sh
+source ./functions/config-prompt.sh
 source ./functions/partition.sh
 source ./functions/sensors.sh
 source ./functions/reflector.sh
@@ -29,13 +21,22 @@ source ./functions/makepkg.sh
 source ./functions/paru.sh
 source ./functions/btrfsmaintenance.sh
 source ./functions/snapper.sh
-source ./functions/gui/openbox.sh
+source ./functions/gui/gui.sh
 source ./functions/vm-guest/vm-guest.sh
 source ./functions/vfio/vfio.sh
 
-root_device_parameter=${1:-}
-
-check_root_device_parameter "${root_device_parameter}"
+# Global configuration
+DESTINATION_DEVICE=
+HOSTNAME=
+ROOT_PASSWORD=
+USERNAME=
+USER_PASSWORD=
+INSTALL_GUI=
+INSTALL_GUI_TYPE=
+SET_VFIO=
+IS_VM_GUEST=
+configure_install
+confirm_install
 
 #
 # Arch installer environment initialization
@@ -51,8 +52,8 @@ pacman-key --populate archlinux
 #
 # Partitioning
 #
-create_partitions "${root_device_parameter}"
-mount_root "${root_device_parameter}"
+create_partitions "${DESTINATION_DEVICE}"
+mount_root "${DESTINATION_DEVICE}"
 configure_swap
 
 #
@@ -61,7 +62,7 @@ configure_swap
 pacstrap /mnt base base-devel linux linux-firmware intel-ucode \
   grub os-prober dosfstools efibootmgr mtools ntfs-3g hdparm nvme-cli sdparm smartmontools usbutils usb_modeswitch lm_sensors i2c-tools lshw powertop liquidctl \
   btrfs-progs grub-btrfs compsize \
-  lsb-release acpid linux-tools dmidecode logrotate pacman-contrib \
+  archlinux-keyring lsb-release acpid linux-tools dmidecode logrotate pacman-contrib \
   man-db man-pages texinfo \
   arj unarj bzip2 gzip lhasa p7zip tar unrar zip unzip xz zstd \
   vim nano bat bash-completion fish pkgfile mlocate htop lsof strace tmux neofetch jq \
@@ -107,7 +108,7 @@ configure_network "${HOSTNAME}"
 #
 # Swappiness config
 #
-echo "vm.swappiness=10" > /mnt/etc/sysctl.d/99-sysctl.conf
+echo "vm.swappiness=10" > /mnt/etc/sysctl.d/99-swappiness.conf
 
 #
 # Aria2 config
@@ -198,29 +199,31 @@ configure_btrfsmaintenance "${USERNAME}"
 #
 # Snapper config
 #
-configure_snapper "${root_device_parameter}"
+configure_snapper "${DESTINATION_DEVICE}"
+
+#
+# Start boostraped system in container
+#
+init_container
+
+#
+# Configure locale in container
+#
+configure_locale_in_container
 
 #
 # Graphical installation (optional)
 #
-if [ "${INSTALL_GUI}" == "1" ]; then
+if [ "${INSTALL_GUI}" = "1" ]; then
 
-  init_container
-
-  install_openbox "${USERNAME}"
-
-  configure_openbox "${USERNAME}"
-
-  configure_xorg
-
-  configure_gtk
+  install_gui "${USERNAME}" "${INSTALL_GUI_TYPE}"
 
 fi
 
 #
 # Virtual machine guest config
 #
-if [ "${IS_VM_GUEST}" == "1" ]; then
+if [ "${IS_VM_GUEST}" = "1" ]; then
   configure_as_vm_guest "${USERNAME}" "${INSTALL_GUI}"
 fi
 
@@ -232,7 +235,7 @@ configure_snap_pac_and_rollback "${USERNAME}"
 #
 # VFIO setup
 #
-if [ "${SET_VFIO}" == "1" ]; then
+if [ "${SET_VFIO}" = "1" ]; then
   configure_vfio
 fi
 
@@ -250,7 +253,7 @@ clean_snapper
 #
 # List enabled systemd units
 #
-if [ "${INSTALL_GUI}" == "1" ]; then
+if [ "${INSTALL_GUI}" = "1" ]; then
   exec_in_container /usr/bin/systemctl list-unit-files --state enabled
 else
   arch-chroot /mnt systemctl list-unit-files --state enabled
@@ -263,12 +266,14 @@ sed -i 's/^%wheel ALL=(ALL) NOPASSWD: ALL/# %wheel ALL=(ALL) NOPASSWD: ALL/' /mn
 sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /mnt/etc/sudoers
 
 #
+# Stop boostraped system in container
+#
+stop_container
+sleep 5
+
+#
 # Cleanup
 #
-if [ "${INSTALL_GUI}" == "1" ]; then
-  stop_container
-fi
-sleep 5
-unmount_root "${root_device_parameter}"
+unmount_root "${DESTINATION_DEVICE}"
 
 popd

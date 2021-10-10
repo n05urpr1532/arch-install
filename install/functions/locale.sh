@@ -3,7 +3,7 @@
 #
 # Locale related config
 #
-configure_locale () {
+configure_locale() {
   arch-chroot /mnt ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
 
   arch-chroot /mnt hwclock --systohc
@@ -14,4 +14,9 @@ configure_locale () {
   echo -e "LANG=fr_FR.UTF-8\nLC_MESSAGES=en_US.UTF-8\nLANGUAGE=en_US" > /mnt/etc/locale.conf
 
   echo "KEYMAP=fr" > /mnt/etc/vconsole.conf
+}
+
+configure_locale_in_container() {
+  exec_in_container /usr/bin/timedatectl --no-ask-password set-timezone Europe/Paris
+  exec_in_container /usr/bin/timedatectl --no-ask-password set-ntp true
 }

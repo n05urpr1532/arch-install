@@ -3,7 +3,7 @@
 #
 # VFIO config
 #
-configure_vfio () {
+configure_vfio() {
   # Set IOMMU and VFIO
   sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 intel_iommu=on iommu=pt"/' /mnt/etc/default/grub
 

@@ -3,7 +3,7 @@
 #
 # Reflector config
 #
-configure_reflector () {
+configure_reflector() {
   cat << EOF > /mnt/etc/xdg/reflector/reflector.conf
 # Reflector configuration file for the systemd service.
 #

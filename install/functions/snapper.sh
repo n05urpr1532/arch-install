@@ -46,13 +46,13 @@ configure_snapper() {
   arch-chroot /mnt systemctl enable snapper-timeline.timer snapper-cleanup.timer
 }
 
-configure_snap_pac_and_rollback () {
+configure_snap_pac_and_rollback() {
   local user_name=$1
 
   arch-chroot /mnt pacman -Sy --noconfirm --needed snap-pac \
-  && arch-chroot /mnt gpg --auto-key-import --recv-keys EB4F9E5A60D32232BB52150C12C87A28FEAC6B20 \
-  && arch-chroot /mnt su -c 'paru -S --noconfirm --needed snap-pac-grub' - "${user_name}" \
-  && arch-chroot /mnt su -c 'paru -S --noconfirm --needed rollback-git' - "${user_name}"
+    && arch-chroot /mnt gpg --auto-key-import --recv-keys EB4F9E5A60D32232BB52150C12C87A28FEAC6B20 \
+    && arch-chroot /mnt su -c 'paru -S --noconfirm --needed snap-pac-grub' - "${user_name}" \
+    && arch-chroot /mnt su -c 'paru -S --noconfirm --needed rollback-git' - "${user_name}"
 
   # snap-pac config
   cat << 'EOF' >> /mnt/etc/snap-pac.ini
@@ -72,7 +72,7 @@ EOF
   sed -i 's%^subvolid5 = /btrfsroot%subvolid5 = /.btrfs-root%' /mnt/etc/rollback.conf
 }
 
-clean_snapper () {
+clean_snapper() {
   local max_snapshot_num
   max_snapshot_num=$(arch-chroot /mnt snapper --no-dbus list | tail -n 1 | cut -d' ' -f 1)
 

@@ -3,7 +3,7 @@
 #
 # Aria2 config
 #
-configure_aria2 () {
+configure_aria2() {
   mkdir -p /mnt/etc/skel/.config/aria2
 
   cat << 'EOF' > /mnt/etc/skel/.config/aria2/aria2.conf

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-check_root_device_parameter () {
+check_root_device_parameter() {
   local root_device_parameter=$1
   if [ -z "${root_device_parameter}" ]; then
     echo "!!! Error !!!"
@@ -9,14 +9,50 @@ check_root_device_parameter () {
     echo ""
     exit 1
   fi
+
+  if ! lsblk "${root_device_parameter}" > /dev/null 2>&1; then
+    echo "!!! Error !!!"
+    echo ""
+    echo "Invalid root device '${root_device_parameter}'"
+    echo ""
+    exit 1
+  fi
 }
 
-get_mount_options () {
+check_not_empty() {
+  local input=$1
+
+  if [ -z "${input}" ]; then
+    echo "!!! Error !!!"
+    echo ""
+    echo "This cannot be empty !"
+    echo ""
+    exit 1
+  fi
+}
+
+check_yes_or_no() {
+  local input=$1
+
+  case ${input} in
+    y | Y | n | N) ;;
+
+    *)
+      echo "!!! Error !!!"
+      echo ""
+      echo "This must be either y for yes or n for no !"
+      echo ""
+      exit 1
+      ;;
+  esac
+}
+
+get_mount_options() {
   # TODO Add space_cache=v2 afterward
   printf "defaults,noatime,autodefrag,compress-force=zstd:2"
 }
 
-mount_root () {
+mount_root() {
   local root_device_parameter=$1
   local mount_options
 
@@ -33,7 +69,7 @@ mount_root () {
   mount -o "${mount_options},subvol=@var_swap" "${root_device_parameter}2" /mnt/var/swap
 }
 
-unmount_root () {
+unmount_root() {
   local root_device_parameter=$1
 
   swapoff /mnt/var/swap/swapfile || true
@@ -41,15 +77,16 @@ unmount_root () {
   umount -A "${root_device_parameter}2" || true
 }
 
-init_container () {
+init_container() {
   sleep 5
-  (systemd-nspawn -bD /mnt &) &
+  systemd-nspawn -bD /mnt < /dev/null &> /dev/null &
+  sleep 10
 }
 
-exec_in_container () {
+exec_in_container() {
   machinectl shell mnt "$@"
 }
 
-stop_container () {
-  ( ( machinectl shell mnt /usr/bin/poweroff ) && sleep 5 ) || machinectl kill mnt
+stop_container() {
+  ( (machinectl shell mnt /usr/bin/poweroff) && sleep 5) || machinectl kill mnt
 }

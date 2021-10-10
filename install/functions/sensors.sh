@@ -3,7 +3,7 @@
 #
 # Sensors config
 #
-configure_sensors () {
+configure_sensors() {
   echo "i2c-dev" > /mnt/etc/modules-load.d/i2c-dev.conf
 
   arch-chroot /mnt modprobe i2c-dev

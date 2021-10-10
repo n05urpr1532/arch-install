@@ -3,7 +3,7 @@
 #
 # Partitioning
 #
-create_partitions () {
+create_partitions() {
   local root_device_parameter=$1
 
   # Create 2 partitions:
