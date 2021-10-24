@@ -68,6 +68,7 @@ install_gui() {
     openbox)
       install_openbox "${user_name}"
       configure_openbox "${user_name}"
+      configure_xfce_theme
       ;;
     kde | plasma)
       install_plasma "${user_name}"

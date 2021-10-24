@@ -10,6 +10,7 @@ pushd "${script_dir}"
 # Functions
 source ../common/functions.sh
 source ./functions/config-prompt.sh
+source ./functions/get-files.sh
 source ./functions/partition.sh
 source ./functions/sensors.sh
 source ./functions/reflector.sh
@@ -133,6 +134,12 @@ arch-chroot /mnt mkinitcpio -P
 #
 sed -i 's/^GRUB_BTRFS_IGNORE_SPECIFIC_PATH=("@")/GRUB_BTRFS_IGNORE_SPECIFIC_PATH=("@" "@home" "@var_swap")/' /mnt/etc/default/grub-btrfs/config
 
+# TODO grub
+## Uncomment one of them for the gfx desired, a image background or a gfxtheme
+##GRUB_BACKGROUND="/path/to/wallpaper"
+#GRUB_THEME="/boot/grub/themes/starfield/theme.txt"
+# in /etc/default/grub
+
 #
 # GRUB config
 #
@@ -200,6 +207,11 @@ configure_btrfsmaintenance "${USERNAME}"
 # Snapper config
 #
 configure_snapper "${DESTINATION_DEVICE}"
+
+#
+# btrfs-du install
+#
+arch-chroot /mnt su -c 'paru -S --noconfirm --needed btrfs-du' - "${USERNAME}"
 
 #
 # Start boostraped system in container

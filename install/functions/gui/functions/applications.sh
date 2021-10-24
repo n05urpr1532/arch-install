@@ -5,5 +5,5 @@ install_apps() {
 
   exec_in_container /usr/bin/su -c 'paru -S --noconfirm --needed srandrd mesa-demos grub-customizer hwinfo' - "${user_name}"
   exec_in_container /usr/bin/su -c 'paru -S --noconfirm --needed pcmanfm-gtk3 xarchiver gvfs gvfs-google gvfs-nfs gvfs-smb' - "${user_name}"
-  exec_in_container /usr/bin/su -c 'paru -S --noconfirm --needed alacritty xterm geany geany-plugins geany-themes firefox firefox-i18n-fr snapper-gui cpupower-gui psensor' - "${user_name}"
+  exec_in_container /usr/bin/su -c 'paru -S --noconfirm --needed alacritty xterm galculator geany geany-plugins geany-themes firefox firefox-i18n-fr snapper-gui cpupower-gui psensor' - "${user_name}"
 }
