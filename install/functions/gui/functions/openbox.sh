@@ -15,13 +15,13 @@ configure_openbox() {
 
   exec_in_container /usr/bin/su -c 'mkdir -p ~/.config' - "${user_name}"
 
-  _configure_openbox_picom "${user_name}"
-
   _configure_openbox_openbox "${user_name}"
 
   _configure_openbox_oblogout
 
   _configure_openbox_xfce_terminal "${user_name}"
+
+  _configure_xfce_settings
 
   _configure_openbox_nitrogen "${user_name}"
 
@@ -31,39 +31,13 @@ configure_openbox() {
 _configure_openbox_openbox () {
   local user_name=$1
 
+  cp -p "$(get_file 'openbox' 'rc.xml')" /mnt/etc/xdg/openbox/rc.xml
+  cp -p "$(get_file 'openbox' 'autostart')" /mnt/etc/xdg/openbox/autostart
+
   mkdir -p /mnt/etc/xdg/obmenu-generator
   cp -p "$(get_file 'obmenu-generator' 'schema.pl')" /mnt/etc/xdg/obmenu-generator/schema.pl
 
-  exec_in_container /usr/bin/su -c 'mkdir -p ~/.config/openbox' - "${user_name}"
-
   exec_in_container /usr/bin/su -c 'obmenu-generator -p -i' - "${user_name}"
-
-  cat << 'EOF' > "/mnt/home/${user_name}/.config/openbox/autostart"
-killall -9 picom nitrogen xfce4-panel xfce4-notifyd xfce4-power-manager xfsettingsd numlockx nm-applet
-
-picom -b --config ~/.config/picom.conf
-
-nitrogen --restore
-
-xfce4-panel &
-/usr/lib/xfce4/notifyd/xfce4-notifyd &
-xfce4-power-manager &
-xfsettingsd --daemon
-
-numlockx &
-
-nm-applet &
-EOF
-
-  cp -p "$(get_file 'openbox' 'rc.xml')" "/mnt/home/${user_name}/.config/openbox"
-
-  exec_in_container /usr/bin/chown -R "${user_name}:${user_name}" "/home/${user_name}/.config/openbox"
-}
-
-_configure_openbox_picom () {
-  local user_name=$1
-
-  exec_in_container /usr/bin/su -c 'cp /etc/xdg/picom.conf ~/.config/picom.conf' - "${user_name}"
 }
 
 _configure_openbox_oblogout () {
@@ -100,6 +74,19 @@ X-XFCE-Category=TerminalEmulator
 X-XFCE-Commands=/usr/bin/alacritty
 X-XFCE-CommandsWithParameter=/usr/bin/alacritty -e "%s"
 EOF
+}
+
+_configure_xfce_settings () {
+  if [ -f /mnt/etc/xdg/xfce4/panel/default.xml ]; then
+    cp -p "$(get_file 'xfce/panel' 'customized.xml')" /mnt/etc/xdg/xfce4/panel/default.xml
+  fi
+  if [ -f /mnt/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml ]; then
+    cp -p "$(get_file 'xfce/xfconf' 'xfce4-keyboard-shortcuts.xml')" /mnt/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml
+  fi
+  if [ -d /mnt/etc/xdg/xfce4 ]; then
+    mkdir -p /mnt/etc/xdg/xfce4/whiskermenu
+    cp -p "$(get_file 'xfce/whiskermenu' 'defaults.rc')" /mnt/etc/xdg/xfce4/whiskermenu/defaults.rc
+  fi
 }
 
 _configure_openbox_nitrogen () {

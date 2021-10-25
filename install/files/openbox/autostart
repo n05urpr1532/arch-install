@@ -1,0 +1,14 @@
+killall -9 picom nitrogen xfce4-panel xfce4-notifyd xfce4-power-manager xfsettingsd numlockx nm-applet
+
+/usr/bin/picom -b
+
+/usr/bin/nitrogen --restore
+
+/usr/bin/xfsettingsd --daemon
+/usr/bin/xfce4-panel &
+/usr/lib/xfce4/notifyd/xfce4-notifyd &
+/usr/bin/xfce4-power-manager &
+
+/usr/bin/numlockx &
+
+/usr/bin/nm-applet &

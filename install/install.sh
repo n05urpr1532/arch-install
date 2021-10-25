@@ -14,6 +14,7 @@ source ./functions/get-files.sh
 source ./functions/partition.sh
 source ./functions/sensors.sh
 source ./functions/reflector.sh
+source ./functions/grub.sh
 source ./functions/locale.sh
 source ./functions/network.sh
 source ./functions/aria2.sh
@@ -134,17 +135,11 @@ arch-chroot /mnt mkinitcpio -P
 #
 sed -i 's/^GRUB_BTRFS_IGNORE_SPECIFIC_PATH=("@")/GRUB_BTRFS_IGNORE_SPECIFIC_PATH=("@" "@home" "@var_swap")/' /mnt/etc/default/grub-btrfs/config
 
-# TODO grub
-## Uncomment one of them for the gfx desired, a image background or a gfxtheme
-##GRUB_BACKGROUND="/path/to/wallpaper"
-#GRUB_THEME="/boot/grub/themes/starfield/theme.txt"
-# in /etc/default/grub
-
 #
 # GRUB config
 #
-arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot/ESP --bootloader-id=ArchLinux --recheck
-arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+configure_grub_theme
+configure_grub
 
 #
 # mlocate config
@@ -289,3 +284,6 @@ sleep 5
 unmount_root "${DESTINATION_DEVICE}"
 
 popd
+
+# TODO Configure Super key
+# xfce4-popup-whiskermenu

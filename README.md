@@ -4,10 +4,21 @@
 
 Install Arch Linux on BTRFS.
 
-Check configuration in script `./install/install.sh`, then run :
+Run :
 ```shell script
-./install/install.sh <disk device path>
+./install/install.sh
 ```
+
+Or with `curl`:
+```shell script
+curl -s https://raw.githubusercontent.com/n05urpr1532/arch-install/main/init-install.sh | bash
+```
+
+For develop branch:
+```shell script
+curl -s https://raw.githubusercontent.com/n05urpr1532/arch-install/develop/init-install.sh | bash -s -- 'develop'
+```
+
 
 ## Rescue
 
