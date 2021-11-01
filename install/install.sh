@@ -29,6 +29,7 @@ source ./functions/vfio/vfio.sh
 
 # Global configuration
 DESTINATION_DEVICE=
+ROOT_PARTITION_SIZE=
 HOSTNAME=
 ROOT_PASSWORD=
 USERNAME=
@@ -54,7 +55,7 @@ pacman-key --populate archlinux
 #
 # Partitioning
 #
-create_partitions "${DESTINATION_DEVICE}"
+create_partitions "${DESTINATION_DEVICE}" "${ROOT_PARTITION_SIZE}"
 mount_root "${DESTINATION_DEVICE}"
 configure_swap
 

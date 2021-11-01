@@ -7,6 +7,10 @@ configure_install() {
   check_not_empty "${DESTINATION_DEVICE}"
   check_root_device_parameter "${DESTINATION_DEVICE}"
 
+  config_prompt_title "Root partition size"
+  ROOT_PARTITION_SIZE=$(config_prompt_root_part_size)
+  check_not_empty "${ROOT_PARTITION_SIZE}"
+
   config_prompt_title "Hostname"
   HOSTNAME=$(config_prompt_hostname)
   check_not_empty "${HOSTNAME}"
@@ -72,6 +76,8 @@ confirm_install() {
   echo ""
   echo "DESTINATION_DEVICE=${DESTINATION_DEVICE}"
   echo ""
+  echo "ROOT_PARTITION_SIZE=${ROOT_PARTITION_SIZE}"
+  echo ""
   echo "HOSTNAME=${HOSTNAME}"
   echo ""
   echo "ROOT_PASSWORD=${ROOT_PASSWORD}"
@@ -123,6 +129,16 @@ config_prompt_disk() {
   local response
 
   read -r -p "Where to install: " -e -i '/dev/vda' response
+
+  check_not_empty "${response}"
+
+  echo "${response}"
+}
+
+config_prompt_root_part_size() {
+  local response
+
+  read -r -p "Root partition size: " -e -i '50%' response
 
   check_not_empty "${response}"
 

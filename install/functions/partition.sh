@@ -5,11 +5,12 @@
 #
 create_partitions() {
   local root_device_parameter=$1
+  local root_partition_size=$2
 
   # Create 2 partitions:
   # * ESP - 256M, type "EFI System"
   # * BROOT - The rest, type "Linux filesystem" (by default)
-  parted --align optimal -s "${root_device_parameter}" "mklabel gpt mkpart ESP fat32 1MiB 257MiB mkpart BROOT btrfs 257MiB 50% set 1 esp on"
+  parted --align optimal -s "${root_device_parameter}" "mklabel gpt mkpart ESP fat32 1MiB 257MiB mkpart BROOT btrfs 257MiB ${root_partition_size} set 1 esp on"
 
   mkfs.fat -v -F 32 -n ESP "${root_device_parameter}1"
   mkfs.btrfs -L BROOT "${root_device_parameter}2" -f
