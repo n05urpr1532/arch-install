@@ -236,9 +236,9 @@ if [ "${IS_VM_GUEST}" = "1" ]; then
 fi
 
 #
-# snap-pac, snap-pac-grub and rollback config
+# snap-pac, snap-pac-grub and snapper-rollback config
 #
-configure_snap_pac_and_rollback "${USERNAME}"
+configure_snap_pac_and_snapper_rollback "${USERNAME}"
 
 #
 # VFIO setup
