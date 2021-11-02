@@ -71,6 +71,9 @@ our $SCHEMA = [
       #{item => ["$editor ~/.conkyrc",              'Conky RC',    'text-x-generic']},
       #{item => ["$editor ~/.config/tint2/tint2rc", 'Tint2 Panel', 'text-x-generic']},
 
+      # PCManFM desktop configuration
+      {item => ["pcmanfm --desktop-pref", 'Desktop configuration', 'preferences-desktop']},
+
       # obmenu-generator category
       {beg => ['Obmenu-Generator', 'accessories-text-editor']},
         {item => ["$editor ~/.config/obmenu-generator/schema.pl", 'Menu Schema', 'text-x-generic']},

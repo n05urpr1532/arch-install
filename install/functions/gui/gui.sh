@@ -63,6 +63,7 @@ install_gui() {
 
   # Applications
   install_apps "${user_name}"
+  configure_geany
 
   case ${install_gui_type} in
     openbox)

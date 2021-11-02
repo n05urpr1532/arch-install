@@ -4,7 +4,7 @@ install_openbox() {
   local user_name=$1
 
   # TODO obkey obkey-git lxhotkey-gtk3 ?
-  exec_in_container /usr/bin/su -c 'paru -S --noconfirm --needed openbox obconf lxhotkey-gtk3 oblogout-py3-git nitrogen picom rofi numlockx network-manager-applet' - "${user_name}"
+  exec_in_container /usr/bin/su -c 'paru -S --noconfirm --needed openbox obconf lxhotkey-gtk3 oblogout-py3-git picom rofi numlockx network-manager-applet' - "${user_name}"
   exec_in_container /usr/bin/su -c 'paru -S --noconfirm --needed xfce4-panel xfconf xfce-polkit xfce4-clipman-plugin xfce4-datetime-plugin xfce4-diskperf-plugin xfce4-fsguard-plugin xfce4-netload-plugin xfce4-notifyd xfce4-power-manager xfce4-pulseaudio-plugin xfce4-screensaver xfce4-sensors-plugin xfce4-settings xfce4-systemload-plugin xfce4-taskmanager xfce4-verve-plugin xfce4-whiskermenu-plugin xfce4-xkb-plugin pavucontrol mugshot' - "${user_name}"
   #exec_in_container /usr/bin/su -c 'paru -S --noconfirm --needed lxappearance-gtk3 lxrandr-gtk3 lxpanel-gtk3 lxpanel-multiload-ng-plugin-gtk3 lxhotkey-gtk3 lxtask-gtk3' - "${user_name}"
   exec_in_container /usr/bin/su -c 'paru -S --noconfirm --needed obmenu-generator perl-gtk3 perl-file-desktopentry xdg-desktop-portal-gtk' - "${user_name}"
@@ -23,7 +23,7 @@ configure_openbox() {
 
   _configure_xfce_settings
 
-  _configure_openbox_nitrogen "${user_name}"
+  _configure_openbox_pcmanfm
 
   _configure_openbox_rofi
 }
@@ -89,35 +89,12 @@ _configure_xfce_settings () {
   fi
 }
 
-_configure_openbox_nitrogen () {
-  local user_name=$1
+_configure_openbox_pcmanfm () {
+  mkdir -p /mnt/etc/xdg/libfm
+  cp -p "$(get_file 'pcmanfm' 'libfm.conf')" /mnt/etc/xdg/libfm/libfm.conf
 
-  mkdir -p /mnt/etc/skel/.config/nitrogen
-  cat << 'EOF' > /mnt/etc/skel/.config/nitrogen/nitrogen.cfg
-[geometry]
-posx=0
-posy=0
-sizex=800
-sizey=600
-
-[nitrogen]
-view=icon
-recurse=true
-sort=alpha
-icon_caps=false
-dirs=/usr/share/backgrounds/archlinux;
-
-EOF
-  cat << 'EOF' > /mnt/etc/skel/.config/nitrogen/bg-saved.cfg
-[xin_-1]
-file=/usr/share/backgrounds/archlinux/split.png
-mode=5
-bgcolor=#000000
-EOF
-
-  exec_in_container /usr/bin/su -c 'mkdir -p ~/.config/nitrogen' - "${user_name}"
-  exec_in_container /usr/bin/su -c 'cp /etc/skel/.config/nitrogen/* ~/.config/nitrogen/' - "${user_name}"
-  exec_in_container /usr/bin/chown -R "${user_name}:${user_name}" "/home/${user_name}/.config/nitrogen"
+  mkdir -p /mnt/etc/xdg/pcmanfm/default
+  cp -p "$(get_file 'pcmanfm' 'pcmanfm.conf')" /mnt/etc/xdg/pcmanfm/default/pcmanfm.conf
 }
 
 _configure_openbox_rofi () {
