@@ -90,4 +90,7 @@ _configure_xfce_settings() {
 _configure_openbox_rofi() {
   mkdir -p /mnt/etc/xdg/rofi
   cp -p "$(get_file 'rofi' 'rofi.rasi')" /mnt/etc/xdg/rofi.rasi
+
+  mkdir -p /mnt/usr/share/polkit-1/actions
+  cp -p "$(get_file 'rofi' 'org.freedesktop.policykit.rofi.pkexec.policy')" /mnt/usr/share/polkit-1/actions/org.freedesktop.policykit.rofi.pkexec.policy
 }

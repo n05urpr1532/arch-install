@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+"-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+"http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+
+ <action id="org.freedesktop.policykit.rofi.pkexec.policy">
+    <description>Run rofi in superuser mode</description>
+    <description xml:lang="fr">Lance rofi avec les droits root</description>
+    <message>Admin right are required to launch rofi in superuser mode</message>
+    <message xml:lang="fr">Les droits d'administration sont nécessaires pour lancer rofi en root </message>
+    <icon_name>system-run</icon_name>
+    <defaults>
+     <allow_any>no</allow_any>
+     <allow_inactive>no</allow_inactive>
+     <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/rofi</annotate>
+    <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
+ </action>
+</policyconfig>

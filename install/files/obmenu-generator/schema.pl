@@ -50,6 +50,11 @@ our $SCHEMA = [
     {cat => ['settings',    'Settings',    'applications-accessories']},
     {cat => ['system',      'System',      'applications-system']},
 
+    {sep => undef},
+    {beg => ['As root', 'system-config-selinux']},
+      {item => ['pkexec rofi -show', 'Run as root', 'system-run']},
+    {end => undef},
+
     #             LABEL          ICON
     #{beg => ['My category',  'cat-icon']},
     #          ... some items ...
