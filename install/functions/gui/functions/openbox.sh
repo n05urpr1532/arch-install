@@ -23,12 +23,10 @@ configure_openbox() {
 
   _configure_xfce_settings
 
-  _configure_openbox_pcmanfm
-
   _configure_openbox_rofi
 }
 
-_configure_openbox_openbox () {
+_configure_openbox_openbox() {
   local user_name=$1
 
   cp -p "$(get_file 'openbox' 'rc.xml')" /mnt/etc/xdg/openbox/rc.xml
@@ -40,11 +38,11 @@ _configure_openbox_openbox () {
   exec_in_container /usr/bin/su -c 'obmenu-generator -p -i' - "${user_name}"
 }
 
-_configure_openbox_oblogout () {
+_configure_openbox_oblogout() {
   cp -p "$(get_file 'oblogout' 'oblogout.conf')" /mnt/etc/oblogout.conf
 }
 
-_configure_openbox_xfce_terminal () {
+_configure_openbox_xfce_terminal() {
   local user_name=$1
 
   sed -i 's/TerminalEmulator=xfce4-terminal/TerminalEmulator=Alacritty/' /mnt/etc/xdg/xfce4/helpers.rc
@@ -76,7 +74,7 @@ X-XFCE-CommandsWithParameter=/usr/bin/alacritty -e "%s"
 EOF
 }
 
-_configure_xfce_settings () {
+_configure_xfce_settings() {
   if [ -f /mnt/etc/xdg/xfce4/panel/default.xml ]; then
     cp -p "$(get_file 'xfce/panel' 'customized.xml')" /mnt/etc/xdg/xfce4/panel/default.xml
   fi
@@ -89,15 +87,7 @@ _configure_xfce_settings () {
   fi
 }
 
-_configure_openbox_pcmanfm () {
-  mkdir -p /mnt/etc/xdg/libfm
-  cp -p "$(get_file 'pcmanfm' 'libfm.conf')" /mnt/etc/xdg/libfm/libfm.conf
-
-  mkdir -p /mnt/etc/xdg/pcmanfm/default
-  cp -p "$(get_file 'pcmanfm' 'pcmanfm.conf')" /mnt/etc/xdg/pcmanfm/default/pcmanfm.conf
-}
-
-_configure_openbox_rofi () {
+_configure_openbox_rofi() {
   mkdir -p /mnt/etc/xdg/rofi
   cp -p "$(get_file 'rofi' 'rofi.rasi')" /mnt/etc/xdg/rofi.rasi
 }
