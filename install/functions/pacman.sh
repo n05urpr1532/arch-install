@@ -17,5 +17,6 @@ EOF
 }
 
 clean_pacman() {
-  arch-chroot /mnt bash -c 'pacman -Qtdq | pacman -Rns --noconfirm -'
+  # shellcheck disable=SC2016
+  arch-chroot /mnt bash -c '[ -n "$(pacman -Qtdq)" ] && pacman -Qtdq | pacman -Rns --noconfirm -'
 }

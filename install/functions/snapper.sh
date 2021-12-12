@@ -3,8 +3,9 @@
 #
 # Snapper config
 #
-configure_snapper() {
+install_and_configure_snapper() {
   local root_device_parameter=$1
+  local user_name=$2
   local mount_options
 
   mount_options=$(get_mount_options)
@@ -13,18 +14,22 @@ configure_snapper() {
     && umount /mnt/home/.snapshots \
     && rm -r /mnt/.snapshots /mnt/home/.snapshots \
     && arch-chroot /mnt pacman -Sy --noconfirm --needed snapper \
+    && arch-chroot /mnt groupadd "btrfs-users" \
+    && arch-chroot /mnt usermod -a -G "btrfs-users" "${user_name}" \
     && arch-chroot /mnt snapper --no-dbus -c root create-config / \
     && arch-chroot /mnt snapper --no-dbus -c home create-config /home \
     && arch-chroot /mnt btrfs sub delete /.snapshots /home/.snapshots \
     && mkdir -p /mnt/{.snapshots,home/.snapshots} \
     && mount -o "${mount_options},subvol=@.snapshots/root" "${root_device_parameter}2" /mnt/.snapshots \
     && mount -o "${mount_options},subvol=@.snapshots/home" "${root_device_parameter}2" /mnt/home/.snapshots \
-    && chmod 750 /mnt/.snapshots /mnt/home/.snapshots \
-    && chown :users /mnt/.snapshots /mnt/home/.snapshots
+    && arch-chroot /mnt chmod 750 /.snapshots /home/.snapshots \
+    && arch-chroot /mnt chown ":btrfs-users" /.snapshots /home/.snapshots
 
   # root config
-  sed -i 's/^ALLOW_GROUPS=""/ALLOW_GROUPS="users"/' /mnt/etc/snapper/configs/root
-  sed -i 's/^NUMBER_LIMIT="50"/NUMBER_LIMIT="10"/' /mnt/etc/snapper/configs/root
+  sed -i 's/^QGROUP=""/QGROUP="1\/1"/' /mnt/etc/snapper/configs/root
+  sed -i 's/^ALLOW_GROUPS=""/ALLOW_GROUPS="btrfs-users"/' /mnt/etc/snapper/configs/root
+  sed -i 's/^NUMBER_LIMIT="50"/NUMBER_LIMIT="3-10"/' /mnt/etc/snapper/configs/root
+  sed -i 's/^NUMBER_LIMIT_IMPORTANT="10"/NUMBER_LIMIT_IMPORTANT="5-10"/' /mnt/etc/snapper/configs/root
   sed -i 's/^NUMBER_MIN_AGE="1800"/NUMBER_MIN_AGE="86400"/' /mnt/etc/snapper/configs/root
   sed -i 's/^TIMELINE_LIMIT_HOURLY="10"/TIMELINE_LIMIT_HOURLY="3"/' /mnt/etc/snapper/configs/root
   sed -i 's/^TIMELINE_LIMIT_DAILY="10"/TIMELINE_LIMIT_DAILY="7"/' /mnt/etc/snapper/configs/root
@@ -33,8 +38,10 @@ configure_snapper() {
   sed -i 's/^TIMELINE_LIMIT_YEARLY="10"/TIMELINE_LIMIT_YEARLY="0"/' /mnt/etc/snapper/configs/root
 
   # home config
-  sed -i 's/^ALLOW_GROUPS=""/ALLOW_GROUPS="users"/' /mnt/etc/snapper/configs/home
-  sed -i 's/^NUMBER_LIMIT="50"/NUMBER_LIMIT="10"/' /mnt/etc/snapper/configs/home
+  sed -i 's/^QGROUP=""/QGROUP="1\/2"/' /mnt/etc/snapper/configs/home
+  sed -i 's/^ALLOW_GROUPS=""/ALLOW_GROUPS="btrfs-users"/' /mnt/etc/snapper/configs/home
+  sed -i 's/^NUMBER_LIMIT="50"/NUMBER_LIMIT="5-10"/' /mnt/etc/snapper/configs/home
+  sed -i 's/^NUMBER_LIMIT_IMPORTANT="10"/NUMBER_LIMIT_IMPORTANT="5-10"/' /mnt/etc/snapper/configs/home
   sed -i 's/^NUMBER_MIN_AGE="1800"/NUMBER_MIN_AGE="86400"/' /mnt/etc/snapper/configs/home
   sed -i 's/^TIMELINE_LIMIT_HOURLY="10"/TIMELINE_LIMIT_HOURLY="6"/' /mnt/etc/snapper/configs/home
   sed -i 's/^TIMELINE_LIMIT_DAILY="10"/TIMELINE_LIMIT_DAILY="7"/' /mnt/etc/snapper/configs/home
@@ -46,7 +53,7 @@ configure_snapper() {
   arch-chroot /mnt systemctl enable snapper-timeline.timer snapper-cleanup.timer
 }
 
-configure_snap_pac_and_snapper_rollback() {
+install_and_configure_snap_pac_and_snapper_rollback() {
   local user_name=$1
 
   arch-chroot /mnt pacman -Sy --noconfirm --needed snap-pac \

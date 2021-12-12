@@ -48,8 +48,7 @@ check_yes_or_no() {
 }
 
 get_mount_options() {
-  # TODO Add space_cache=v2 afterward
-  printf "defaults,noatime,autodefrag,compress-force=zstd:2"
+  printf "defaults,noatime,autodefrag,compress-force=zstd:2,space_cache=v2"
 }
 
 mount_root() {

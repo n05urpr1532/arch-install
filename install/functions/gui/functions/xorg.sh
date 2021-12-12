@@ -4,7 +4,7 @@ install_xorg() {
   local user_name=$1
 
   exec_in_container /usr/bin/su -c 'paru -S --noconfirm --needed xorg xorg-apps libxkbcommon-x11 xdg-utils xf86-input-evdev xf86-input-libinput xf86-input-void xf86-video-dummy xf86-video-fbdev xf86-video-intel vulkan-intel' - "${user_name}"
-  exec_in_container /usr/bin/su -c 'paru -S --noconfirm --needed libva libva-mesa-driver intel-media-driver noto-fonts' - "${user_name}"
+  exec_in_container /usr/bin/su -c 'paru -S --noconfirm --needed libva libva-mesa-driver intel-media-driver noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra' - "${user_name}"
 }
 
 configure_xorg() {

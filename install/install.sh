@@ -8,25 +8,28 @@ install_main () {
 
   pushd "${script_dir}"
 
-  # Functions
+  # Common functions
   source ../common/functions.sh
   source ./functions/config-prompt.sh
   source ./functions/get-files.sh
-  source ./functions/partition.sh
-  source ./functions/sensors.sh
-  source ./functions/reflector.sh
-  source ./functions/grub.sh
-  source ./functions/locale.sh
-  source ./functions/network.sh
+
+  # Specific functions
   source ./functions/aria2.sh
-  source ./functions/pacman.sh
-  source ./functions/makepkg.sh
-  source ./functions/paru.sh
   source ./functions/btrfsmaintenance.sh
-  source ./functions/snapper.sh
+  source ./functions/fish-config.sh
+  source ./functions/grub.sh
   source ./functions/gui/gui.sh
-  source ./functions/vm-guest/vm-guest.sh
+  source ./functions/locale.sh
+  source ./functions/makepkg.sh
+  source ./functions/network.sh
+  source ./functions/pacman.sh
+  source ./functions/partition.sh
+  source ./functions/paru.sh
+  source ./functions/reflector.sh
+  source ./functions/sensors.sh
+  source ./functions/snapper.sh
   source ./functions/vfio/vfio.sh
+  source ./functions/vm-guest/vm-guest.sh
 
   # Global configuration
   DESTINATION_DEVICE=
@@ -63,13 +66,13 @@ install_main () {
   #
   # Boostrapping
   #
-  pacstrap /mnt base base-devel linux linux-firmware intel-ucode \
+  pacstrap /mnt base base-devel linux linux-headers linux-lts linux-lts-headers linux-firmware intel-ucode \
     grub os-prober dosfstools efibootmgr mtools ntfs-3g hdparm nvme-cli sdparm smartmontools usbutils usb_modeswitch lm_sensors i2c-tools lshw powertop liquidctl \
     btrfs-progs grub-btrfs compsize \
     archlinux-keyring lsb-release acpid linux-tools dmidecode logrotate pacman-contrib \
     man-db man-pages texinfo \
     arj unarj bzip2 gzip lhasa p7zip tar unrar zip unzip xz zstd \
-    vim nano bat bash-completion fish pkgfile mlocate htop lsof strace tmux neofetch jq \
+    awesome-terminal-fonts vim neovim nano bat lsd bash-completion fish pkgfile mlocate htop lsof strace tmux neofetch jq ripgrep \
     aria2 reflector networkmanager git git-lfs rsync wget openssh net-tools ethtool gnu-netcat ntp
 
   #
@@ -140,7 +143,7 @@ install_main () {
   #
   # GRUB config
   #
-  configure_grub_theme
+  configure_grub_theme "${IS_VM_GUEST}"
   configure_grub
 
   #
@@ -149,6 +152,11 @@ install_main () {
   sed -i 's/^PRUNENAMES = "\(.*\)"/PRUNENAMES = "(\1 .snapshots)"/' /mnt/etc/updatedb.conf
   sed -i 's/^PRUNEPATHS = "\(.*\)"/PRUNEPATHS = "(\1 \/.btrfs-root)"/' /mnt/etc/updatedb.conf
   arch-chroot /mnt updatedb
+
+  #
+  # Fish shell config
+  #
+  configure_fish
 
   #
   # Setting root password
@@ -168,10 +176,12 @@ install_main () {
   printf "%s\n%s" "${USER_PASSWORD}" "${USER_PASSWORD}" | arch-chroot /mnt passwd "${USERNAME}"
 
   #
-  # vim as default editor
+  # nvim as default editor, bat as default pager
   #
   cat << 'EOF' >> /mnt/etc/environment
-EDITOR=vim
+EDITOR=nvim
+VISUAL=nvim
+PAGER=bat
 EOF
 
   #
@@ -198,17 +208,22 @@ EOF
   #
   # btrfsmaintenance config
   #
-  configure_btrfsmaintenance "${USERNAME}"
+  install_and_configure_btrfsmaintenance "${USERNAME}"
 
   #
   # Snapper config
   #
-  configure_snapper "${DESTINATION_DEVICE}"
+  install_and_configure_snapper "${DESTINATION_DEVICE}" "${USERNAME}"
 
   #
   # btrfs-du install
   #
   arch-chroot /mnt su -c 'paru -S --noconfirm --needed btrfs-du' - "${USERNAME}"
+
+  #
+  # Patch grub to make vmlinuz-linux the first entry (and not vmlinuz-linux-lts)
+  #
+  configure_grub_linux_as_default "${USERNAME}"
 
   #
   # Start boostraped system in container
@@ -225,6 +240,11 @@ EOF
   #
   if [ "${INSTALL_GUI}" = "1" ]; then
 
+    #
+    # Configure fish prompt for user
+    #
+    configure_fish_prompt "${USERNAME}"
+
     install_gui "${USERNAME}" "${INSTALL_GUI_TYPE}"
 
   fi
@@ -239,7 +259,7 @@ EOF
   #
   # snap-pac, snap-pac-grub and snapper-rollback config
   #
-  configure_snap_pac_and_snapper_rollback "${USERNAME}"
+  install_and_configure_snap_pac_and_snapper_rollback "${USERNAME}"
 
   #
   # VFIO setup

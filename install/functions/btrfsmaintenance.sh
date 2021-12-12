@@ -3,7 +3,7 @@
 #
 # btrfsmaintenance config
 #
-configure_btrfsmaintenance() {
+install_and_configure_btrfsmaintenance() {
   local user_name=$1
 
   arch-chroot /mnt su -c 'paru -S --noconfirm --needed btrfsmaintenance' - "${user_name}"
