@@ -8,6 +8,9 @@ install_and_configure_snapper() {
   local user_name=$2
   local mount_options
 
+  local qgroup_root='1/1'
+  local qgroup_home='1/2'
+
   mount_options=$(get_mount_options)
 
   umount /mnt/.snapshots \
@@ -23,10 +26,12 @@ install_and_configure_snapper() {
     && mount -o "${mount_options},subvol=@.snapshots/root" "${root_device_parameter}2" /mnt/.snapshots \
     && mount -o "${mount_options},subvol=@.snapshots/home" "${root_device_parameter}2" /mnt/home/.snapshots \
     && arch-chroot /mnt chmod 750 /.snapshots /home/.snapshots \
-    && arch-chroot /mnt chown ":btrfs-users" /.snapshots /home/.snapshots
+    && arch-chroot /mnt chown ":btrfs-users" /.snapshots /home/.snapshots \
+    && arch-chroot /mnt btrfs qgroup create "${qgroup_root}" /.btrfs-root \
+    && arch-chroot /mnt btrfs qgroup create "${qgroup_home}" /.btrfs-root
 
   # root config
-  sed -i 's/^QGROUP=""/QGROUP="1\/1"/' /mnt/etc/snapper/configs/root
+  sed -i "s@^QGROUP=\"\"@QGROUP=\"${qgroup_root}\"@" /mnt/etc/snapper/configs/root
   sed -i 's/^ALLOW_GROUPS=""/ALLOW_GROUPS="btrfs-users"/' /mnt/etc/snapper/configs/root
   sed -i 's/^NUMBER_LIMIT="50"/NUMBER_LIMIT="3-10"/' /mnt/etc/snapper/configs/root
   sed -i 's/^NUMBER_LIMIT_IMPORTANT="10"/NUMBER_LIMIT_IMPORTANT="5-10"/' /mnt/etc/snapper/configs/root
@@ -38,7 +43,7 @@ install_and_configure_snapper() {
   sed -i 's/^TIMELINE_LIMIT_YEARLY="10"/TIMELINE_LIMIT_YEARLY="0"/' /mnt/etc/snapper/configs/root
 
   # home config
-  sed -i 's/^QGROUP=""/QGROUP="1\/2"/' /mnt/etc/snapper/configs/home
+  sed -i "s@^QGROUP=\"\"@QGROUP=\"${qgroup_home}\"@" /mnt/etc/snapper/configs/home
   sed -i 's/^ALLOW_GROUPS=""/ALLOW_GROUPS="btrfs-users"/' /mnt/etc/snapper/configs/home
   sed -i 's/^NUMBER_LIMIT="50"/NUMBER_LIMIT="5-10"/' /mnt/etc/snapper/configs/home
   sed -i 's/^NUMBER_LIMIT_IMPORTANT="10"/NUMBER_LIMIT_IMPORTANT="5-10"/' /mnt/etc/snapper/configs/home
