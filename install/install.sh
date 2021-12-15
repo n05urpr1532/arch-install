@@ -3,10 +3,15 @@
 # Safe Bash parameters
 set -euo pipefail
 
-install_main () {
+DESTINATION_DEVICE_TMP_FILE="/tmp/DESTINATION_DEVICE"
+INSTALL_LOG_FILE_NAME="arch-install_$(date '+%Y-%m-%d_%H%M%S').log"
+INSTALL_LOG_FILE_PATH="/tmp/${INSTALL_LOG_FILE_NAME}"
+
+install_main() {
+  # Current script directory
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 
-  pushd "${script_dir}"
+  pushd "${script_dir}" 1> /dev/null
 
   # Common functions
   source ../common/functions.sh
@@ -44,6 +49,8 @@ install_main () {
   IS_VM_GUEST=
   configure_install
   confirm_install
+
+  printf "%s" "${DESTINATION_DEVICE}" > "${DESTINATION_DEVICE_TMP_FILE}"
 
   #
   # Arch installer environment initialization
@@ -305,10 +312,45 @@ EOF
   #
   unmount_root "${DESTINATION_DEVICE}"
 
-  popd
+  popd 1> /dev/null
 
   # TODO Configure Super key
   # xfce4-popup-whiskermenu
 }
 
-(install_main) |& tee -a "${0}".log
+install_copy_log_file() {
+  local destination_device
+  destination_device=$(cat "${DESTINATION_DEVICE_TMP_FILE}")
+
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+
+  pushd "${script_dir}" 1> /dev/null
+
+  # Common functions
+  source ../common/functions.sh
+
+  #
+  # Remount the destination drive
+  #
+  echo "Remouting ${destination_device}..."
+  mount_root "${destination_device}"
+
+  #
+  # Copy log file to destination
+  #
+  echo "Copying install log file to ${destination_device}..."
+  mkdir -p "/mnt/root/os-install-log"
+  cp "${INSTALL_LOG_FILE_PATH}" "/mnt/root/os-install-log/${INSTALL_LOG_FILE_NAME}"
+
+  #
+  # Cleanup
+  #
+  echo "Unmounting ${destination_device}..."
+  unmount_root "${destination_device}"
+
+  popd 1> /dev/null
+}
+
+(install_main) |& tee -a "${INSTALL_LOG_FILE_PATH}"
+
+install_copy_log_file

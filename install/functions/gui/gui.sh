@@ -22,7 +22,7 @@ install_gui() {
 
   esac
 
-  pushd "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)" || exit 1
+  pushd "$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)" 1>/dev/null || exit 1
 
   # Functions
   source ./functions/applications.sh
@@ -41,7 +41,7 @@ install_gui() {
       ;;
   esac
 
-  popd || exit 1
+  popd 1>/dev/null || exit 1
 
   # XOrg
   install_xorg "${user_name}"

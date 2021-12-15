@@ -26,4 +26,4 @@ cd arch-install
 
 clear && time ./install/install.sh
 
-popd
+popd 1>/dev/null
