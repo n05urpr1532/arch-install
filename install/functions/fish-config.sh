@@ -8,25 +8,31 @@ configure_fish() {
   cat << 'EOF' > /mnt/etc/fish/conf.d/50-aliases.fish
 #!/usr/bin/env fish
 
-if status is-interactive && ! fish_is_root_user
+if status is-interactive
   #
   # Aliases for interactive shell
   #
+  if fish_is_root_user
 
-  # pacman commands
-  alias pacman_update_mirrors="sudo reflector --threads "(nproc)" --country France --protocol https --sort rate --age 12 --number 20 --save /etc/pacman.d/mirrorlist"
-  alias pacman_update_keyring="sudo pacman-key --init && sudo pacman-key --populate archlinux && sudo pacman -Sy archlinux-keyring"
+    # ls alias
+    alias ll="lsd -lh"
+    alias la="lsd -alh"
 
-  # ls to lsd alias
-  alias ls="lsd"
-  alias ll="lsd -l"
-  alias la="lsd -al"
+  else
 
-  # cat to bat alias
-  alias cat='bat --paging=never'
+    # pacman commands
+    alias pacman_update_mirrors="sudo reflector --threads "(nproc)" --country France --protocol https --sort rate --age 12 --number 20 --save /etc/pacman.d/mirrorlist"
+    alias pacman_update_keyring="sudo pacman-key --init && sudo pacman-key --populate archlinux && sudo pacman -Sy archlinux-keyring"
 
-  # less to bat alias
-  alias less='bat'
+    # ls to lsd alias
+    alias ls="lsd"
+    alias ll="lsd -lh"
+    alias la="lsd -alh"
+
+    # less to bat alias
+    alias less='bat'
+
+  end
 end
 EOF
 }
@@ -60,14 +66,14 @@ if status is-interactive
   set -U tide_chruby_icon \ue23e
   set -U tide_cmd_duration_bg_color 303030
   set -U tide_cmd_duration_color 87875F
-  set -U tide_cmd_duration_decimals 0
+  set -U tide_cmd_duration_decimals 2
   set -U tide_cmd_duration_icon \uf252
-  set -U tide_cmd_duration_threshold 3000
+  set -U tide_cmd_duration_threshold 50
   set -U tide_context_always_display false
   set -U tide_context_bg_color 303030
-  set -U tide_context_color_default D7AF87
-  set -U tide_context_color_root D7AF00
-  set -U tide_context_color_ssh D7AF87
+  set -U tide_context_color_default 87875F
+  set -U tide_context_color_root D74100
+  set -U tide_context_color_ssh 87875F
   set -U tide_git_bg_color 303030
   set -U tide_git_bg_color_unstable 303030
   set -U tide_git_bg_color_urgent 303030
@@ -90,7 +96,7 @@ if status is-interactive
   set -U tide_kubectl_color 326CE5
   set -U tide_kubectl_icon \u2388
   set -U tide_left_prompt_frame_enabled true
-  set -U tide_left_prompt_items os pwd git newline
+  set -U tide_left_prompt_items os context pwd git newline
   set -U tide_left_prompt_prefix ''
   set -U tide_left_prompt_separator_diff_color \ue0b0
   set -U tide_left_prompt_separator_same_color \ue0b1
@@ -119,7 +125,7 @@ if status is-interactive
   set -U tide_pwd_icon_unwritable \uf023
   set -U tide_pwd_markers .bzr .citc .git .hg .node-version .python-version .ruby-version .shorten_folder_marker .svn .terraform Cargo.toml composer.json CVS go.mod package.json
   set -U tide_right_prompt_frame_enabled true
-  set -U tide_right_prompt_items status cmd_duration context shlvl jobs go node php virtual_env vi_mode time
+  set -U tide_right_prompt_items status cmd_duration jobs go node php rustc virtual_env vi_mode time
   set -U tide_right_prompt_prefix \ue0b2
   set -U tide_right_prompt_separator_diff_color \ue0b2
   set -U tide_right_prompt_separator_same_color \ue0b3
